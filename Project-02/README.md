@@ -21,9 +21,6 @@ Evaluate the performance of the model.
 
 The main goal is to predict the student's final grade (G3) using selected student information.
 
-Regression: predict the exact G3 score (0–20)
-Classification: predict pass/fail (G3 ≥ 10 = pass)
-
 
 
 
