@@ -187,6 +187,46 @@ elif page == "Fraud Detection":
                     "of actual fraud."
                 )
 
+                # Show important model features
+                st.subheader("Important Model Features")
+
+                classifier = model
+
+                if hasattr(model, "named_steps"):
+                    classifier = model.named_steps.get(
+                        "classifier", model
+                    )
+
+                if hasattr(classifier, "feature_importances_"):
+                    importance = pd.DataFrame({
+                        "Feature": feature_order,
+                        "Importance": classifier.feature_importances_,
+                    })
+
+                    importance = importance.sort_values(
+                        "Importance",
+                        ascending=False,
+                    ).head(10)
+
+                    st.write(
+                        "These are the 10 most important features "
+                        "across the trained Random Forest model."
+                    )
+
+                    st.bar_chart(
+                        importance.set_index("Feature")["Importance"]
+                    )
+
+                    st.dataframe(
+                        importance.reset_index(drop=True),
+                        use_container_width=True,
+                    )
+                else:
+                    st.info(
+                        "Feature importance is unavailable "
+                        "for the loaded model."
+                    )
+
             except Exception as error:
                 st.error(f"Prediction failed: {error}")
 
