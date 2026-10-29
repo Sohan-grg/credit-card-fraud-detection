@@ -71,9 +71,10 @@ if page == "Dashboard":
 
 # Fraud detection page
 
+
 elif page == "Fraud Detection":
     st.header("Fraud Detection")
-    st.write("Enter the transaction details below.")
+    st.write("Enter transaction details to estimate fraud risk.")
 
     with st.form("transaction_form"):
         st.subheader("Transaction Details")
@@ -94,8 +95,7 @@ elif page == "Fraud Detection":
 
         st.subheader("Anonymized Features (V1–V28)")
         st.caption(
-            "These features are anonymized by the dataset. "
-            "For meaningful testing, use values from a dataset row."
+            "Use values from a dataset row for meaningful testing."
         )
 
         features = {}
@@ -110,44 +110,85 @@ elif page == "Fraud Detection":
                     key=f"feature_V{i}",
                 )
 
-        submitted = st.form_submit_button("Validate Transaction")
+        submitted = st.form_submit_button("Predict Fraud Risk")
 
     if submitted:
-        values = {
-            "Time": time_value,
-            **features,
-            "Amount": amount,
-        }
-
         feature_order = (
             ["Time"]
             + [f"V{i}" for i in range(1, 29)]
             + ["Amount"]
         )
 
+        values = {
+            "Time": time_value,
+            **features,
+            "Amount": amount,
+        }
+
         transaction = pd.DataFrame(
             [values],
             columns=feature_order,
         )
 
-        errors = []
-
         if not np.isfinite(transaction.to_numpy()).all():
-            errors.append("All values must be finite numbers.")
+            st.error("Please enter valid, finite numerical values.")
 
-        if time_value < 0:
-            errors.append("Time cannot be negative.")
+        elif time_value < 0 or amount < 0:
+            st.error("Time and transaction amount cannot be negative.")
 
-        if amount < 0:
-            errors.append("Transaction amount cannot be negative.")
+        elif model is None:
+            st.error(
+                "The trained model could not be loaded. "
+                "Check the model file and try again."
+            )
 
-        if errors:
-            for error in errors:
-                st.error(error)
         else:
-            st.success("Input validation passed!")
-            st.subheader("Validated Transaction")
-            st.dataframe(transaction, use_container_width=True)
+            try:
+                fraud_probability = float(
+                    model.predict_proba(transaction)[0][1]
+                )
+
+                prediction = int(
+                    fraud_probability >= 0.5
+                )
+
+                st.subheader("Prediction Result")
+
+                col1, col2 = st.columns(2)
+
+                col1.metric(
+                    "Estimated Fraud Probability",
+                    f"{fraud_probability * 100:.2f}%",
+                )
+
+                if fraud_probability < 0.20:
+                    risk_category = "Low Risk"
+                elif fraud_probability < 0.50:
+                    risk_category = "Medium Risk"
+                else:
+                    risk_category = "High Risk"
+
+                col2.metric("Fraud Risk Category", risk_category)
+
+                st.progress(fraud_probability)
+
+                if prediction == 1:
+                    st.error(
+                        "Model prediction: Potentially fraudulent transaction"
+                    )
+                else:
+                    st.success(
+                        "Model prediction: Likely legitimate transaction"
+                    )
+
+                st.caption(
+                    "Risk categories are project-defined thresholds. "
+                    "Model probabilities are estimates, not guarantees "
+                    "of actual fraud."
+                )
+
+            except Exception as error:
+                st.error(f"Prediction failed: {error}")
 
 
 # About page
