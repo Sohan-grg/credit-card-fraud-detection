@@ -1,6 +1,7 @@
 
 from pathlib import Path
 
+import numpy as np
 import streamlit as st
 import joblib
 import pandas as pd
@@ -69,12 +70,85 @@ if page == "Dashboard":
         st.warning("Dataset not found in the data folder.")
 
 # Fraud detection page
+
 elif page == "Fraud Detection":
     st.header("Fraud Detection")
-    st.info(
-        "Transaction input fields and fraud predictions "
-        "will be added in the next commits."
-    )
+    st.write("Enter the transaction details below.")
+
+    with st.form("transaction_form"):
+        st.subheader("Transaction Details")
+
+        time_value = st.number_input(
+            "Time (seconds since first transaction)",
+            min_value=0.0,
+            value=0.0,
+            step=1.0,
+        )
+
+        amount = st.number_input(
+            "Transaction Amount",
+            min_value=0.0,
+            value=100.0,
+            step=1.0,
+        )
+
+        st.subheader("Anonymized Features (V1–V28)")
+        st.caption(
+            "These features are anonymized by the dataset. "
+            "For meaningful testing, use values from a dataset row."
+        )
+
+        features = {}
+        columns = st.columns(2)
+
+        for i in range(1, 29):
+            with columns[(i - 1) % 2]:
+                features[f"V{i}"] = st.number_input(
+                    f"V{i}",
+                    value=0.0,
+                    format="%.6f",
+                    key=f"feature_V{i}",
+                )
+
+        submitted = st.form_submit_button("Validate Transaction")
+
+    if submitted:
+        values = {
+            "Time": time_value,
+            **features,
+            "Amount": amount,
+        }
+
+        feature_order = (
+            ["Time"]
+            + [f"V{i}" for i in range(1, 29)]
+            + ["Amount"]
+        )
+
+        transaction = pd.DataFrame(
+            [values],
+            columns=feature_order,
+        )
+
+        errors = []
+
+        if not np.isfinite(transaction.to_numpy()).all():
+            errors.append("All values must be finite numbers.")
+
+        if time_value < 0:
+            errors.append("Time cannot be negative.")
+
+        if amount < 0:
+            errors.append("Transaction amount cannot be negative.")
+
+        if errors:
+            for error in errors:
+                st.error(error)
+        else:
+            st.success("Input validation passed!")
+            st.subheader("Validated Transaction")
+            st.dataframe(transaction, use_container_width=True)
+
 
 # About page
 elif page == "About":
