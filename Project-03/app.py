@@ -46,28 +46,91 @@ except Exception as error:
     st.sidebar.error(f"Model loading failed: {error}")
 
 # Dashboard page
+
 if page == "Dashboard":
     st.header("Transaction Overview")
 
     if DATA_PATH.exists():
         df = pd.read_csv(DATA_PATH)
 
-        total = len(df)
-        fraud = int((df["Class"] == 1).sum())
-        legitimate = int((df["Class"] == 0).sum())
-        fraud_rate = fraud / total * 100 if total else 0
+        total_transactions = len(df)
+        fraud_count = int((df["Class"] == 1).sum())
+        legitimate_count = int((df["Class"] == 0).sum())
+
+        fraud_rate = (
+            fraud_count / total_transactions * 100
+            if total_transactions > 0
+            else 0
+        )
+
+        # Dashboard metrics
+        st.subheader("Transaction Statistics")
 
         col1, col2, col3, col4 = st.columns(4)
 
-        col1.metric("Total Transactions", f"{total:,}")
-        col2.metric("Fraud Cases", f"{fraud:,}")
-        col3.metric("Legitimate Transactions", f"{legitimate:,}")
-        col4.metric("Fraud Rate", f"{fraud_rate:.3f}%")
+        col1.metric(
+            "Total Transactions",
+            f"{total_transactions:,}"
+        )
 
-        st.subheader("Dataset Preview")
-        st.dataframe(df.head(10), use_container_width=True)
+        col2.metric(
+            "Detected Fraud Cases",
+            f"{fraud_count:,}"
+        )
+
+        col3.metric(
+            "Legitimate Transactions",
+            f"{legitimate_count:,}"
+        )
+
+        col4.metric(
+            "Fraud Rate",
+            f"{fraud_rate:.3f}%"
+        )
+
+        # Fraud distribution
+        st.subheader("Fraud Distribution")
+
+        distribution = pd.DataFrame({
+            "Transaction Type": [
+                "Legitimate",
+                "Fraudulent",
+            ],
+            "Count": [
+                legitimate_count,
+                fraud_count,
+            ],
+        })
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.bar_chart(
+                distribution.set_index("Transaction Type")
+            )
+
+        with col2:
+            st.write("Transaction Class Distribution")
+            st.dataframe(
+                distribution,
+                use_container_width=True,
+                hide_index=True,
+            )
+
+        # Dataset preview
+        st.subheader("Recent Dataset Records")
+
+        st.dataframe(
+            df.head(10),
+            use_container_width=True,
+        )
+
     else:
-        st.warning("Dataset not found in the data folder.")
+        st.error(
+            "Dataset not found. Please place creditcard.csv "
+            "inside the data folder."
+        )
+
 
 # Fraud detection page
 
