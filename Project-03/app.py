@@ -116,6 +116,53 @@ if page == "Dashboard":
                 use_container_width=True,
                 hide_index=True,
             )
+        # Transaction amount analysis
+        st.subheader("Transaction Amount Analysis")
+
+        # Transaction class filter
+        selected_classes = st.multiselect(
+            "Filter by Transaction Type",
+            options=[0, 1],
+            default=[0, 1],
+            format_func=lambda x: "Legitimate" if x == 0 else "Fraudulent"
+        )
+
+        # Amount range filter
+        min_amount = float(df["Amount"].min())
+        max_amount = float(df["Amount"].max())
+
+        amount_range = st.slider(
+            "Select Transaction Amount Range",
+            min_value=min_amount,
+            max_value=max_amount,
+            value=(min_amount, max_amount)
+        )
+
+        # Apply filters
+        filtered_df = df[
+            (df["Class"].isin(selected_classes)) &
+            (df["Amount"] >= amount_range[0]) &
+            (df["Amount"] <= amount_range[1])
+        ]
+
+        st.write(f"Filtered Transactions: {len(filtered_df):,}")
+
+        # Transaction amount chart
+        st.subheader("Transaction Amount Distribution")
+
+        st.histogram if False else None
+
+        st.bar_chart(
+            filtered_df["Amount"].value_counts().sort_index().head(30)
+        )
+
+        # Filtered records
+        st.subheader("Filtered Transaction Records")
+
+        st.dataframe(
+            filtered_df.head(100),
+            use_container_width=True
+        )
 
         # Dataset preview
         st.subheader("Recent Dataset Records")
