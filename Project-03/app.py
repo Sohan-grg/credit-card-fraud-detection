@@ -50,6 +50,10 @@ except Exception as error:
     model = None
     st.sidebar.error(f"Model loading failed: {error}")
 
+# Store prediction history during the current session
+if "prediction_history" not in st.session_state:
+    st.session_state.prediction_history = []
+
 # Dashboard page
 
 if page == "Dashboard":
@@ -301,6 +305,29 @@ elif page == "Fraud Detection":
                     "Model probabilities are estimates, not guarantees "
                     "of actual fraud."
                 )
+
+               # Save this prediction in the current session
+                report_row = {
+                    **values,
+                    "fraud_probability": fraud_probability,
+                    "prediction": prediction,
+                    "risk_category": risk_category,
+                    "prediction_time": str(pd.Timestamp.now()),
+                }
+                st.session_state.prediction_history.append(report_row)
+
+                # Allow the user to download all predictions from this session
+                report_df = pd.DataFrame(
+                    st.session_state.prediction_history
+                )
+
+                st.download_button(
+                    label="Download Prediction Report (CSV)",
+                    data=report_df.to_csv(index=False),
+                    file_name="fraud_prediction_report.csv",
+                    mime="text/csv",
+                    key="download_prediction_report",
+                ) 
 
                 # Show important model features
                 st.subheader("Important Model Features")
