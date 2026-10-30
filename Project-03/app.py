@@ -31,8 +31,13 @@ def load_model():
 # Sidebar navigation
 st.sidebar.title("Navigation")
 page = st.sidebar.radio(
-    "Choose a page",
-    ["Dashboard", "Fraud Detection", "About"],
+    "Navigation",
+    [
+        "Dashboard",
+        "Fraud Detection",
+        "Model Performance",
+        "About"
+    ]
 )
 
 # Main heading
@@ -340,6 +345,67 @@ elif page == "Fraud Detection":
             except Exception as error:
                 st.error(f"Prediction failed: {error}")
 
+elif page == "Model Performance":
+    st.header("Model Performance Dashboard")
+
+    report_path = BASE_DIR / "reports" / "model_comparison.csv"
+
+    if report_path.exists():
+        results = pd.read_csv(report_path)
+
+        st.subheader("Model Comparison")
+        st.dataframe(
+            results,
+            use_container_width=True,
+            hide_index=True
+        )
+
+        st.subheader("Performance Metrics")
+
+        metric = st.selectbox(
+            "Select Performance Metric",
+            [
+                "average_precision",
+                "roc_auc",
+                "precision",
+                "recall",
+                "f1_score"
+            ]
+        )
+
+        st.bar_chart(
+            results.set_index("model")[metric]
+        )
+
+        st.subheader("Best Performing Model")
+
+        best_model = results.loc[
+            results["f1_score"].idxmax()
+        ]
+
+        st.success(
+            f"Best Model: {best_model['model']}"
+        )
+
+        col1, col2, col3 = st.columns(3)
+
+        col1.metric(
+            "Precision",
+            f"{best_model['precision']:.2%}"
+        )
+
+        col2.metric(
+            "Recall",
+            f"{best_model['recall']:.2%}"
+        )
+
+        col3.metric(
+            "F1 Score",
+            f"{best_model['f1_score']:.2%}"
+        )
+
+    else:
+        st.error("Model comparison report not found.")
 
 # About page
 elif page == "About":
