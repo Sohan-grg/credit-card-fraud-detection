@@ -437,11 +437,43 @@ elif page == "Model Performance":
 # About page
 elif page == "About":
     st.header("About This Project")
+
     st.write(
-        "This project explores machine learning methods "
-        "for identifying potentially fraudulent credit card transactions."
+        "This project uses machine learning to identify potentially "
+        "fraudulent credit card transactions."
     )
-    st.write("Models evaluated: Logistic Regression and Random Forest.")
+
+    st.subheader("Models Used")
+    st.write(
+        "The project evaluates Logistic Regression and Random Forest. "
+        "Random Forest is used for transaction predictions."
+    )
+
+    st.subheader("Model Limitations")
+
+    st.markdown("""
+    1. **Class Imbalance:** The dataset contains significantly fewer
+       fraudulent transactions than legitimate transactions.
+
+    2. **Anonymized Features:** Features V1 to V28 are PCA-transformed
+       and do not have directly understandable meanings.
+
+    3. **False Positives:** Legitimate transactions may sometimes
+       be incorrectly classified as fraudulent.
+
+    4. **False Negatives:** Some fraudulent transactions may be
+       incorrectly classified as legitimate.
+
+    5. **Prediction Uncertainty:** Fraud probabilities are estimates
+       and do not guarantee that a transaction is fraudulent.
+
+    6. **Dataset Limitations:** The model was trained using a specific
+       dataset and may not perform equally well on real-world
+       transactions.
+    """)
+
     st.warning(
-        "Predictions are estimates, not proof of fraudulent activity."
+        "This application is an educational machine learning project. "
+        "Its predictions should not be treated as a final financial "
+        "decision."
     )
