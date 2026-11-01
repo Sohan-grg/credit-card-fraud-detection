@@ -182,9 +182,18 @@ if page == "Dashboard":
         )
 
     else:
-        st.error(
-            "Dataset not found. Please place creditcard.csv "
-            "inside the data folder."
+        st.warning("Dashboard dataset is not available.")
+
+        st.info(
+            "The original credit card dataset is not included "
+            "in the GitHub repository. Therefore, transaction "
+            "statistics and amount analysis are unavailable "
+            "in the deployed version."
+        )
+
+        st.success(
+            "You can still use Fraud Detection, "
+            "Model Performance, and About pages."
         )
 
 
