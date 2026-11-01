@@ -6,4 +6,4 @@ __pycache__/
 
 data/creditcard.csv
 models/*.pkl
-models/*.joblib
+models/logistic_regression.joblib
