@@ -82,3 +82,22 @@ python -m pytest -v
 - Python 3.10 or later
 - Credit Card Fraud Detection dataset
 - Internet connection for initial dependency installation
+
+
+## Application Screenshots
+
+### 1. Dashboard
+
+![Dashboard](screenshots/dashboard.png)
+
+### 2. Fraud Detection
+
+![Fraud Detection](screenshots/frauddetection.png)
+
+### 3. Model Performance
+
+![Model Performance](screenshots/modelperformance.png)
+
+### 4. About and Model Limitations
+
+![About](screenshots/aboutus.png)
